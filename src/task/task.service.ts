@@ -6,7 +6,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export class TaskService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findOne(id: number): Promise<Task | null> {
+  async findOne(id: string): Promise<Task | null> {
     try {
       return await this.prisma.task.findUnique({
         where: {
@@ -20,9 +20,9 @@ export class TaskService {
     }
   }
 
-  async findAll(userId: number): Promise<Task[] | null> {
+  async findAll(userId: string): Promise<Task[] | null> {
     try {
-      return await this.prisma.task.findMany({ where: { userId } });
+      return await this.prisma.task.findMany({ where: { userId: userId } });
     } catch (error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : 'problem with finding of task';
@@ -30,7 +30,7 @@ export class TaskService {
     }
   }
 
-  async create(userId: number, text: string): Promise<Task | null> {
+  async create(userId: string, text: string): Promise<Task | null> {
     try {
       return await this.prisma.task.create({ data: { userId, text } });
     } catch (error: unknown) {
@@ -42,7 +42,7 @@ export class TaskService {
     }
   }
 
-  async delete(id: number) {
+  async delete(id: string) {
     try {
       return await this.prisma.task.delete({ where: { id } });
     } catch (error: unknown) {
@@ -54,7 +54,7 @@ export class TaskService {
     }
   }
 
-  async updateStatus(task_id: number, status: TaskStatus) {
+  async updateStatus(task_id: string, status: TaskStatus) {
     try {
       return await this.prisma.task.update({
         where: { id: task_id },

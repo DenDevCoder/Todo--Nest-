@@ -6,7 +6,19 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findOne(id: number): Promise<User | null> {
+  async checkUserExist(email: string): Promise<boolean> {
+    try {
+      const user = await this.prisma.user.findUnique({ where: { email } });
+      if (user) {
+        return true;
+      }
+      return false;
+    } catch (error: any) {
+      throw new Error(error.message);
+    }
+  }
+
+  async findOne(id: string): Promise<User | null> {
     try {
       return await this.prisma.user.findUnique({
         where: {
@@ -31,12 +43,15 @@ export class UserService {
   }
 
   async create(
+    userId: string,
     email: string,
     name: string,
     password: string,
   ): Promise<User | null> {
     try {
-      return await this.prisma.user.create({ data: { email, name, password } });
+      return await this.prisma.user.create({
+        data: { id: userId, email, name, password },
+      });
     } catch (error: unknown) {
       const errorMessage =
         error instanceof Error
@@ -46,7 +61,7 @@ export class UserService {
     }
   }
 
-  async delete(id: number) {
+  async delete(id: string) {
     try {
       return await this.prisma.user.delete({ where: { id } });
     } catch (error: any) {

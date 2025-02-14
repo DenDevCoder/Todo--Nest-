@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  ForbiddenException,
   Get,
   HttpException,
   HttpStatus,
@@ -9,23 +10,29 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Req,
+  UseGuards,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
 import { TaskService } from './task.service';
 import { Task } from '@prisma/client';
 import { createTaskDto, UpdateStatusDto } from './interface/dto';
+import { AuthGuard } from 'src/auth/auth.guard';
+import { Request } from 'express';
 
 @Controller('task')
 export class TaskController {
   constructor(private readonly taskService: TaskService) {}
 
-  @Get(':id')
-  async getallTask(
-    @Param(new ParseIntPipe()) id: number,
-  ): Promise<Task[] | null> {
+  @Get()
+  @UseGuards(AuthGuard)
+  async getallTask(@Req() req: Request): Promise<Task[] | null> {
     try {
-      return await this.taskService.findAll(id);
+      if (!req.user) {
+        throw new ForbiddenException();
+      }
+      return await this.taskService.findAll(req.user.id);
     } catch (error: any) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -33,16 +40,24 @@ export class TaskController {
 
   @Post()
   @UsePipes(new ValidationPipe())
-  async create(@Body() body: createTaskDto): Promise<Task | null> {
+  @UseGuards(AuthGuard)
+  async create(
+    @Body() body: createTaskDto,
+    @Req() req: Request,
+  ): Promise<Task | null> {
     try {
-      const { userId, text } = body;
-      return await this.taskService.create(userId, text);
+      if (!req.user) {
+        throw new ForbiddenException();
+      }
+      const { text } = body;
+      return await this.taskService.create(req.user.id, text);
     } catch (error: any) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
   @Patch()
+  @UseGuards(AuthGuard)
   @UsePipes(new ValidationPipe())
   async updateStatus(@Body() updateStatusDto: UpdateStatusDto) {
     try {
@@ -54,7 +69,8 @@ export class TaskController {
   }
 
   @Delete(':id')
-  async delete(@Param(new ValidationPipe()) id: number) {
+  @UseGuards(AuthGuard)
+  async delete(@Param('id') id: string) {
     try {
       return await this.taskService.delete(id);
     } catch (error: any) {

@@ -2,34 +2,30 @@ import {
   Body,
   Controller,
   Delete,
+  ForbiddenException,
   HttpException,
   HttpStatus,
   Param,
   ParseIntPipe,
-  Post,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { User } from '@prisma/client';
-import { createUserDto } from './interface/dto';
+import { AuthGuard } from 'src/auth/auth.guard';
+import { Request } from 'express';
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post()
-  async create(@Body() createUserDto: createUserDto): Promise<User | null> {
-    try {
-      const { email, password, name } = createUserDto;
-      return await this.userService.create(email, name, password);
-    } catch (error: any) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-  }
-
   @Delete()
-  async delete(@Param(new ParseIntPipe()) id: number) {
+  @UseGuards(AuthGuard)
+  async delete(@Req() req: Request) {
     try {
-      return await this.userService.delete(id);
+      if (!req.user) {
+        throw new ForbiddenException();
+      }
+      return await this.userService.delete(req.user.id);
     } catch (error: any) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }

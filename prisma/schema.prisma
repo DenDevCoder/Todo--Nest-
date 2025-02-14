@@ -16,7 +16,7 @@ enum TaskStatus {
   FAILED
 }
 model User {
-  id Int @id @default(autoincrement())
+  id String @id @default(uuid())
   email String @unique
   name String @unique
   password String
@@ -24,8 +24,8 @@ model User {
 }   
 
 model Task{
-  id Int @id @default(autoincrement())
-  userId Int
+  id String @id @default(uuid())
+  userId String
   text String 
   status TaskStatus @default(RUNNING)
   user User @relation(fields: [userId],references: [id])
