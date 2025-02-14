@@ -30,15 +30,31 @@ export class UserService {
     }
   }
 
-  async create(email: string, name: string): Promise<User | null> {
+  async create(
+    email: string,
+    name: string,
+    password: string,
+  ): Promise<User | null> {
     try {
-      return await this.prisma.user.create({ data: { email, name } });
+      return await this.prisma.user.create({ data: { email, name, password } });
     } catch (error: unknown) {
       const errorMessage =
         error instanceof Error
           ? error.message
           : 'problem with creating of user';
       return null;
+    }
+  }
+
+  async delete(id: number) {
+    try {
+      return await this.prisma.user.delete({ where: { id } });
+    } catch (error: any) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'problem with deleting of user';
+      throw new Error(errorMessage);
     }
   }
 }
