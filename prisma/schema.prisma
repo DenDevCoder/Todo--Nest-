@@ -9,6 +9,12 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+enum TaskStatus {
+  RUNNING
+  COMPLETED
+  PENDING
+  FAILED
+}
 model User {
   id Int @id @default(autoincrement())
   email String @unique
@@ -20,5 +26,6 @@ model Task{
   id Int @id @default(autoincrement())
   userId Int
   text String 
+  status TaskStatus @default(RUNNING)
   user User @relation(fields: [userId],references: [id])
 }

@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Task } from '@prisma/client';
+import { Task, TaskStatus } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
@@ -15,7 +15,7 @@ export class TaskService {
       });
     } catch (error: unknown) {
       const errorMessage =
-        error instanceof Error ? error.message : 'problem with finding user';
+        error instanceof Error ? error.message : 'problem with finding of task';
       throw new NotFoundException(errorMessage);
     }
   }
@@ -25,7 +25,7 @@ export class TaskService {
       return await this.prisma.task.findMany({ where: { userId } });
     } catch (error: unknown) {
       const errorMessage =
-        error instanceof Error ? error.message : 'problem with finding users';
+        error instanceof Error ? error.message : 'problem with finding of task';
       throw new NotFoundException(errorMessage);
     }
   }
@@ -37,8 +37,35 @@ export class TaskService {
       const errorMessage =
         error instanceof Error
           ? error.message
-          : 'problem with creating of user';
-      return null;
+          : 'problem with creating of task';
+      throw new Error(errorMessage);
+    }
+  }
+
+  async delete(id: number) {
+    try {
+      return await this.prisma.task.delete({ where: { id } });
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'problem with deleting of task';
+      throw new Error(errorMessage);
+    }
+  }
+
+  async updateStatus(task_id: number, status: TaskStatus) {
+    try {
+      return await this.prisma.task.update({
+        where: { id: task_id },
+        data: { status: status },
+      });
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'problem with deleting of task';
+      throw new Error(errorMessage);
     }
   }
 }
