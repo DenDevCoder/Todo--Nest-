@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -49,8 +50,9 @@ export class UserService {
     password: string,
   ): Promise<User | null> {
     try {
+      const hashPassword = await bcrypt.hash(password, 10);
       return await this.prisma.user.create({
-        data: { id: userId, email, name, password },
+        data: { id: userId, email, name, password: hashPassword },
       });
     } catch (error: unknown) {
       const errorMessage =
