@@ -11,6 +11,12 @@ import { SupabaseService } from 'src/supabase/supabase.service';
 import { signInDto, SignUpDto } from './dto/auth.dto';
 import { UserService } from 'src/user/user.service';
 import { User } from '@prisma/client';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiResponse,
+} from '@nestjs/swagger';
 
 @Controller('auth')
 export class AuthController {
@@ -20,6 +26,10 @@ export class AuthController {
   ) {}
 
   @Post('signup')
+  @ApiOperation({ summary: 'user registration' })
+  @ApiBody({ type: SignUpDto })
+  @ApiResponse({ status: 201, description: 'user was registrated' })
+  @ApiResponse({ status: 400, description: 'uncorrect data' })
   @UsePipes(new ValidationPipe())
   async signUp(@Body() body: SignUpDto) {
     const { email, name, password } = body;
@@ -49,6 +59,10 @@ export class AuthController {
   }
 
   @Post('signin')
+  @ApiOperation({ summary: 'user login' })
+  @ApiBody({ type: signInDto })
+  @ApiResponse({ status: 200, description: 'successful login' })
+  @ApiResponse({ status: 401, description: 'bad input data' })
   @UsePipes(new ValidationPipe())
   async signIn(@Body() body: signInDto) {
     const { email, password } = body;
@@ -61,6 +75,10 @@ export class AuthController {
     return data;
   }
 
+  @ApiOperation({ summary: 'user logout' })
+  @ApiBearerAuth()
+  @ApiResponse({ status: 201, description: 'successful logout' })
+  @ApiResponse({ status: 500, description: 'server error' })
   @Post('signout')
   async signOut() {
     const { error } = await this.supabase.getAuthClient().signOut();
@@ -69,6 +87,10 @@ export class AuthController {
     }
   }
 
+  @ApiOperation({ summary: 'get user info' })
+  @ApiBearerAuth()
+  @ApiResponse({ status: 201, description: 'success' })
+  @ApiResponse({ status: 500, description: 'server error' })
   @Get('user')
   async getUser(@Req() req: Request) {
     const {

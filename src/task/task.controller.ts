@@ -20,12 +20,22 @@ import { Task } from '@prisma/client';
 import { createTaskDto, UpdateStatusDto } from './interface/dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { Request } from 'express';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiResponse,
+} from '@nestjs/swagger';
 
 @Controller('task')
 export class TaskController {
   constructor(private readonly taskService: TaskService) {}
 
   @Get()
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'get all tasks' })
+  @ApiResponse({ status: 200, description: 'list of tasks' })
+  @ApiResponse({ status: 500, description: 'server error' })
   @UseGuards(AuthGuard)
   async getallTask(@Req() req: Request): Promise<Task[] | null> {
     try {
@@ -39,6 +49,11 @@ export class TaskController {
   }
 
   @Post()
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'create new task' })
+  @ApiBody({ type: createTaskDto })
+  @ApiResponse({ status: 201, description: 'task was created' })
+  @ApiResponse({ status: 400, description: 'bad request' })
   @UsePipes(new ValidationPipe())
   @UseGuards(AuthGuard)
   async create(
@@ -57,6 +72,11 @@ export class TaskController {
   }
 
   @Patch()
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'update status of task' })
+  @ApiBody({ type: UpdateStatusDto })
+  @ApiResponse({ status: 200, description: 'status was updated' })
+  @ApiResponse({ status: 400, description: 'bad request' })
   @UseGuards(AuthGuard)
   @UsePipes(new ValidationPipe())
   async updateStatus(@Body() updateStatusDto: UpdateStatusDto) {
@@ -69,6 +89,11 @@ export class TaskController {
   }
 
   @Delete(':id')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'delete task' })
+  @ApiResponse({ status: 200, description: 'task was deleted' })
+  @ApiResponse({ status: 400, description: 'bad request' })
+  @ApiResponse({ status: 500, description: 'server error' })
   @UseGuards(AuthGuard)
   async delete(@Param('id') id: string) {
     try {
