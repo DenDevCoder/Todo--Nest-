@@ -1,0 +1,44 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Mutation {
+  createTask(data: createTaskDto!): Task!
+  delete(id: String!): Task!
+  updateStatus(data: UpdateStatusDto!): Task!
+}
+
+type Query {
+  getallTask: [Task!]!
+}
+
+type Task {
+  id: ID!
+  status: String!
+  text: String!
+  user: User!
+  userId: String!
+}
+
+enum TaskStatus {
+  COMPLETED
+  FAILED
+  PENDING
+  RUNNING
+}
+
+input UpdateStatusDto {
+  status: TaskStatus!
+  task_id: String!
+}
+
+type User {
+  email: String!
+  id: ID!
+  name: String!
+  tasks: [Task!]!
+}
+
+input createTaskDto {
+  text: String!
+}
